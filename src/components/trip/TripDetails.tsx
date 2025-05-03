@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useTrip } from '@/context/TripContext';
 import { format, isSameDay } from 'date-fns';
-import { Calendar, ArrowLeft, Plus, MapPin, Trash } from 'lucide-react';
+import { Calendar, ArrowLeft, Plus, MapPin, Trash, ExternalLink } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -341,6 +341,12 @@ const PlaceList: React.FC<PlaceListProps> = ({ tripId, dayId, cityId, places }) 
     toast.success("Place removed from your itinerary");
   };
 
+  const openInGoogleMaps = (placeName: string) => {
+    const encodedQuery = encodeURIComponent(placeName);
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
+    window.open(googleMapsUrl, '_blank');
+  };
+
   const sortedPlaces = [...places].sort((a, b) => a.order - b.order);
 
   return (
@@ -360,7 +366,13 @@ const PlaceList: React.FC<PlaceListProps> = ({ tripId, dayId, cityId, places }) 
           >
             <div className="timeline-dot">{index + 1}</div>
             <div className="flex-1 bg-background p-3 rounded-lg shadow-sm flex justify-between items-center">
-              <span>{place.name}</span>
+              <button 
+                className="flex items-center text-left hover:text-travel-primary transition-colors"
+                onClick={() => openInGoogleMaps(place.name)}
+              >
+                <span>{place.name}</span>
+                <ExternalLink className="h-3 w-3 ml-2" />
+              </button>
               <Button 
                 variant="ghost" 
                 size="icon" 
