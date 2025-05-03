@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import AddressSearch from './AddressSearch';
 
 interface TripDetailsProps {
   onBack: () => void;
@@ -159,6 +160,10 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
     setNewCityName('');
     toast.success("City added to your itinerary");
   };
+
+  const handleAddressSelect = (address: string) => {
+    setNewCityName(address);
+  };
   
   const handleDeleteDay = () => {
     deleteDay(tripId, day.id);
@@ -193,12 +198,12 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
           )}
           
           <form onSubmit={handleAddCity} className="flex gap-2 pt-2">
-            <Input
-              placeholder="Add a city (e.g., Paris)"
-              value={newCityName}
-              onChange={(e) => setNewCityName(e.target.value)}
-              className="flex-1"
-            />
+            <div className="flex-1">
+              <AddressSearch
+                onAddressSelect={handleAddressSelect}
+                placeholder="Add a city (e.g., Paris, France)"
+              />
+            </div>
             <Button type="submit" className="bg-travel-secondary hover:bg-travel-secondary/90">
               <Plus className="h-4 w-4 mr-2" /> Add City
             </Button>
@@ -239,6 +244,10 @@ const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
     toast.success("Place added to your itinerary");
   };
   
+  const handleAddressSelect = (address: string) => {
+    setNewPlaceName(address);
+  };
+
   const handleDeleteCity = () => {
     deleteCity(tripId, dayId, city.id);
     toast.success("City removed from your itinerary");
@@ -272,12 +281,12 @@ const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
       )}
       
       <form onSubmit={handleAddPlace} className="flex gap-2">
-        <Input
-          placeholder="Add a place to visit (e.g., Eiffel Tower)"
-          value={newPlaceName}
-          onChange={(e) => setNewPlaceName(e.target.value)}
-          className="flex-1"
-        />
+        <div className="flex-1">
+          <AddressSearch
+            onAddressSelect={handleAddressSelect}
+            placeholder="Add a place to visit (e.g., Eiffel Tower)"
+          />
+        </div>
         <Button type="submit" variant="outline" className="border-travel-secondary text-travel-secondary">
           <Plus className="h-4 w-4 mr-1" /> Add
         </Button>

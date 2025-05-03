@@ -10,6 +10,8 @@ import { useTrip } from '@/context/TripContext';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { DateRange } from "react-day-picker";
+import AddressSearch from './AddressSearch';
 
 interface CreateTripFormProps {
   onComplete: () => void;
@@ -17,13 +19,11 @@ interface CreateTripFormProps {
 
 const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
   const [name, setName] = useState('');
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
   });
+  const [destination, setDestination] = useState('');
   const { createTrip } = useTrip();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
       return;
     }
     
-    if (!dateRange.from || !dateRange.to) {
+    if (!dateRange?.from || !dateRange?.to) {
       toast.error('Please select start and end dates');
       return;
     }
@@ -63,6 +63,16 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
               className="w-full"
             />
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">
+              Destination
+            </label>
+            <AddressSearch 
+              onAddressSelect={setDestination}
+              placeholder="Where are you heading? (e.g., Paris, France)"
+            />
+          </div>
           
           <div className="space-y-2">
             <label className="text-sm font-medium">
@@ -74,11 +84,11 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
-                    !dateRange.from && !dateRange.to && "text-muted-foreground"
+                    !dateRange?.from && "text-muted-foreground"
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateRange.from ? (
+                  {dateRange?.from ? (
                     dateRange.to ? (
                       <>
                         {format(dateRange.from, "LLL dd, yyyy")} -{" "}
