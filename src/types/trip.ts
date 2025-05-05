@@ -4,6 +4,8 @@ export interface Place {
   name: string;
   notes?: string;
   order: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface City {

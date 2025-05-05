@@ -1,16 +1,16 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Trip, Day, City, Place } from '@/types/trip';
 import { v4 as uuidv4 } from 'uuid';
 import { addDays, isSameDay, format } from 'date-fns';
+import { LocationResult } from '@/components/trip/AddressSearch';
 
 interface TripContextType {
   trips: Trip[];
   currentTrip: Trip | null;
   createTrip: (name: string, startDate: Date, endDate: Date) => Trip;
   addDay: (tripId: string, date: Date) => Day | undefined;
-  addCity: (tripId: string, dayId: string, cityName: string) => City | undefined;
-  addPlace: (tripId: string, dayId: string, cityId: string, placeName: string) => Place | undefined;
+  addCity: (tripId: string, dayId: string, locationInfo: LocationResult) => City | undefined;
+  addPlace: (tripId: string, dayId: string, cityId: string, locationInfo: LocationResult) => Place | undefined;
   reorderPlace: (tripId: string, dayId: string, cityId: string, placeId: string, newOrder: number) => void;
   deletePlace: (tripId: string, dayId: string, cityId: string, placeId: string) => void;
   deleteCity: (tripId: string, dayId: string, cityId: string) => void;
@@ -94,10 +94,10 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Add a city to a day
-  const addCity = (tripId: string, dayId: string, cityName: string): City | undefined => {
+  const addCity = (tripId: string, dayId: string, locationInfo: LocationResult): City | undefined => {
     const newCity: City = {
       id: uuidv4(),
-      name: cityName,
+      name: locationInfo.name,
       places: [],
     };
 
@@ -107,7 +107,7 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
           const updatedDays = trip.days.map(day => {
             if (day.id === dayId) {
               // Check if city already exists
-              const cityExists = day.cities.some(city => city.name.toLowerCase() === cityName.toLowerCase());
+              const cityExists = day.cities.some(city => city.name.toLowerCase() === locationInfo.name.toLowerCase());
               if (cityExists) {
                 return day;
               }
@@ -129,7 +129,7 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   // Add a place to a city
-  const addPlace = (tripId: string, dayId: string, cityId: string, placeName: string): Place | undefined => {
+  const addPlace = (tripId: string, dayId: string, cityId: string, locationInfo: LocationResult): Place | undefined => {
     let maxOrder = -1;
     
     // Find the current max order for places in this city
@@ -153,8 +153,10 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
 
     const newPlace: Place = {
       id: uuidv4(),
-      name: placeName,
+      name: locationInfo.name,
       order: maxOrder + 1,
+      lat: locationInfo.lat,
+      lng: locationInfo.lng,
     };
 
     setTrips(currentTrips => {

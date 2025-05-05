@@ -5,8 +5,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Search, Loader2, MapPin } from "lucide-react";
 
+export interface LocationResult {
+  name: string;
+  lat?: number;
+  lng?: number;
+}
+
 interface AddressSearchProps {
-  onAddressSelect: (address: string) => void;
+  onAddressSelect: (location: LocationResult) => void;
   placeholder?: string;
 }
 
@@ -83,7 +89,11 @@ const AddressSearch: React.FC<AddressSearchProps> = ({ onAddressSelect, placehol
 
   const handleSelectAddress = (address: AddressSuggestion) => {
     setQuery(address.display_name);
-    onAddressSelect(address.display_name);
+    onAddressSelect({
+      name: address.display_name,
+      lat: parseFloat(address.lat),
+      lng: parseFloat(address.lon)
+    });
     setIsOpen(false);
     setSuggestions([]);
   };

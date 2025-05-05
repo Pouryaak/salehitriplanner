@@ -1,16 +1,17 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useTrip } from '@/context/TripContext';
 import { format, isSameDay } from 'date-fns';
-import { Calendar, ArrowLeft, Plus, MapPin, Trash, ExternalLink } from 'lucide-react';
+import { Calendar, ArrowLeft, Plus, MapPin, Trash, ExternalLink, Map } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import AddressSearch from './AddressSearch';
+import AddressSearch, { LocationResult } from './AddressSearch';
+import DayMap from './DayMap';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface TripDetailsProps {
   onBack: () => void;
@@ -147,22 +148,16 @@ interface DayCardProps {
 
 const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
   const { addCity, deleteDay } = useTrip();
-  const [newCityName, setNewCityName] = useState('');
+  const [activeTab, setActiveTab] = useState<string>("itinerary");
   
-  const handleAddCity = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newCityName.trim()) {
+  const handleAddCity = (locationInfo: LocationResult) => {
+    if (!locationInfo.name.trim()) {
       toast.error("Please enter a city name");
       return;
     }
     
-    addCity(tripId, day.id, newCityName);
-    setNewCityName('');
+    addCity(tripId, day.id, locationInfo);
     toast.success("City added to your itinerary");
-  };
-
-  const handleAddressSelect = (address: string) => {
-    setNewCityName(address);
   };
   
   const handleDeleteDay = () => {
@@ -170,6 +165,19 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
     toast.success("Day removed from your trip");
   };
   
+  // Get all places with coordinates for the map
+  const placesWithCoords = day.cities.flatMap(city => 
+    city.places
+      .filter(place => place.lat !== undefined && place.lng !== undefined)
+      .map(place => ({
+        id: place.id,
+        name: place.name,
+        order: place.order,
+        lat: place.lat!,
+        lng: place.lng!
+      }))
+  );
+
   return (
     <Card>
       <div className="p-4 pb-0 flex justify-between items-start">
@@ -185,30 +193,44 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
           <Trash className="h-4 w-4" />
         </Button>
       </div>
+
       <CardContent>
-        <div className="space-y-4">
-          {day.cities.length > 0 ? (
-            day.cities.map((city) => (
-              <CityCard key={city.id} tripId={tripId} dayId={day.id} city={city} />
-            ))
-          ) : (
-            <div className="text-center py-4 bg-muted/30 rounded">
-              <p className="text-muted-foreground">No cities added yet</p>
-            </div>
-          )}
-          
-          <form onSubmit={handleAddCity} className="flex gap-2 pt-2">
-            <div className="flex-1">
+        <Tabs 
+          defaultValue="itinerary" 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="space-y-4"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
+            <TabsTrigger value="map" className="flex items-center gap-1">
+              <Map className="h-4 w-4" /> Map View
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="itinerary" className="space-y-4">
+            {day.cities.length > 0 ? (
+              day.cities.map((city) => (
+                <CityCard key={city.id} tripId={tripId} dayId={day.id} city={city} />
+              ))
+            ) : (
+              <div className="text-center py-4 bg-muted/30 rounded">
+                <p className="text-muted-foreground">No cities added yet</p>
+              </div>
+            )}
+            
+            <div className="pt-2">
               <AddressSearch
-                onAddressSelect={handleAddressSelect}
+                onAddressSelect={handleAddCity}
                 placeholder="Add a city (e.g., Paris, France)"
               />
             </div>
-            <Button type="submit" className="bg-travel-secondary hover:bg-travel-secondary/90">
-              <Plus className="h-4 w-4 mr-2" /> Add City
-            </Button>
-          </form>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="map" className="pt-2">
+            <DayMap places={placesWithCoords} />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
@@ -230,24 +252,17 @@ interface CityCardProps {
 
 const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
   const { addPlace, deleteCity } = useTrip();
-  const [newPlaceName, setNewPlaceName] = useState('');
   
-  const handleAddPlace = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newPlaceName.trim()) {
+  const handleAddPlace = (locationInfo: LocationResult) => {
+    if (!locationInfo.name.trim()) {
       toast.error("Please enter a place name");
       return;
     }
     
-    addPlace(tripId, dayId, city.id, newPlaceName);
-    setNewPlaceName('');
+    addPlace(tripId, dayId, city.id, locationInfo);
     toast.success("Place added to your itinerary");
   };
   
-  const handleAddressSelect = (address: string) => {
-    setNewPlaceName(address);
-  };
-
   const handleDeleteCity = () => {
     deleteCity(tripId, dayId, city.id);
     toast.success("City removed from your itinerary");
@@ -280,17 +295,12 @@ const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
         </div>
       )}
       
-      <form onSubmit={handleAddPlace} className="flex gap-2">
-        <div className="flex-1">
-          <AddressSearch
-            onAddressSelect={handleAddressSelect}
-            placeholder="Add a place to visit (e.g., Eiffel Tower)"
-          />
-        </div>
-        <Button type="submit" variant="outline" className="border-travel-secondary text-travel-secondary">
-          <Plus className="h-4 w-4 mr-1" /> Add
-        </Button>
-      </form>
+      <div className="flex gap-2">
+        <AddressSearch
+          onAddressSelect={handleAddPlace}
+          placeholder="Add a place to visit (e.g., Eiffel Tower)"
+        />
+      </div>
     </div>
   );
 };
