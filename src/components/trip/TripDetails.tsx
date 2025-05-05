@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -144,6 +143,16 @@ interface DayCardProps {
   };
 }
 
+// Utility function to extract names from addresses
+const extractNameFromAddress = (fullAddress: string): string => {
+  // For places and attractions, usually the name is before the first comma
+  const parts = fullAddress.split(',');
+  if (parts.length > 0) {
+    return parts[0].trim();
+  }
+  return fullAddress; // Fallback to full address if splitting fails
+};
+
 const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
   const { addCity, deleteDay } = useTrip();
   const [activeTab, setActiveTab] = useState<string>("itinerary");
@@ -155,7 +164,7 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
     }
     
     // Extract just the city name from the full address
-    const cityName = extractCityName(locationInfo.name);
+    const cityName = extractNameFromAddress(locationInfo.name);
     
     // Create a modified location with just the city name
     const cityLocation: LocationResult = {
@@ -165,17 +174,6 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
     
     addCity(tripId, day.id, cityLocation);
     toast.success("City added to your itinerary");
-  };
-  
-  // Extract city name from full address
-  const extractCityName = (fullAddress: string): string => {
-    // Most addresses from OpenStreetMap come in format "City, Region, Country"
-    // Split by comma and take the first part
-    const parts = fullAddress.split(',');
-    if (parts.length > 0) {
-      return parts[0].trim();
-    }
-    return fullAddress; // Fallback to full address if splitting fails
   };
   
   const handleDeleteDay = () => {
@@ -273,7 +271,16 @@ const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
       return;
     }
     
-    addPlace(tripId, dayId, city.id, locationInfo);
+    // Extract just the place name from the full address
+    const placeName = extractNameFromAddress(locationInfo.name);
+    
+    // Create a modified location with just the place name
+    const placeLocation: LocationResult = {
+      ...locationInfo,
+      name: placeName
+    };
+    
+    addPlace(tripId, dayId, city.id, placeLocation);
     toast.success("Place added to your itinerary");
   };
   
