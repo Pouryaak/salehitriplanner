@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -153,8 +154,28 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
       return;
     }
     
-    addCity(tripId, day.id, locationInfo);
+    // Extract just the city name from the full address
+    const cityName = extractCityName(locationInfo.name);
+    
+    // Create a modified location with just the city name
+    const cityLocation: LocationResult = {
+      ...locationInfo,
+      name: cityName
+    };
+    
+    addCity(tripId, day.id, cityLocation);
     toast.success("City added to your itinerary");
+  };
+  
+  // Extract city name from full address
+  const extractCityName = (fullAddress: string): string => {
+    // Most addresses from OpenStreetMap come in format "City, Region, Country"
+    // Split by comma and take the first part
+    const parts = fullAddress.split(',');
+    if (parts.length > 0) {
+      return parts[0].trim();
+    }
+    return fullAddress; // Fallback to full address if splitting fails
   };
   
   const handleDeleteDay = () => {

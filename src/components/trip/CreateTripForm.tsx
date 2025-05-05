@@ -45,7 +45,25 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
   };
 
   const handleDestinationSelect = (location: LocationResult) => {
-    setDestination(location);
+    // Extract just the city name from the full address
+    const cityName = extractCityName(location.name);
+    
+    // Update destination with just the city name
+    setDestination({
+      ...location,
+      name: cityName
+    });
+  };
+
+  // Extract city name from full address
+  const extractCityName = (fullAddress: string): string => {
+    // Most addresses from OpenStreetMap come in format "City, Region, Country"
+    // Split by comma and take the first part
+    const parts = fullAddress.split(',');
+    if (parts.length > 0) {
+      return parts[0].trim();
+    }
+    return fullAddress; // Fallback to full address if splitting fails
   };
 
   return (
