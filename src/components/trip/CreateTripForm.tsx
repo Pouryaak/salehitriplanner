@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { DateRange } from "react-day-picker";
-import AddressSearch from './AddressSearch';
+import AddressSearch, { LocationResult } from './AddressSearch';
 
 interface CreateTripFormProps {
   onComplete: () => void;
@@ -23,7 +23,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
     from: undefined,
     to: undefined,
   });
-  const [destination, setDestination] = useState('');
+  const [destination, setDestination] = useState<LocationResult | null>(null);
   const { createTrip } = useTrip();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,6 +42,10 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
     createTrip(name, dateRange.from, dateRange.to);
     toast.success('Trip created successfully!');
     onComplete();
+  };
+
+  const handleDestinationSelect = (location: LocationResult) => {
+    setDestination(location);
   };
 
   return (
@@ -69,7 +73,7 @@ const CreateTripForm: React.FC<CreateTripFormProps> = ({ onComplete }) => {
               Destination
             </label>
             <AddressSearch 
-              onAddressSelect={setDestination}
+              onAddressSelect={handleDestinationSelect}
               placeholder="Where are you heading? (e.g., Paris, France)"
             />
           </div>

@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import AddressSearch, { LocationResult } from './AddressSearch';
 import DayMap from './DayMap';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Place } from '@/types/trip';
 
 interface TripDetailsProps {
   onBack: () => void;
@@ -137,11 +138,7 @@ interface DayCardProps {
     cities: {
       id: string;
       name: string;
-      places: {
-        id: string;
-        name: string;
-        order: number;
-      }[];
+      places: Place[];
     }[];
   };
 }
@@ -242,11 +239,7 @@ interface CityCardProps {
   city: {
     id: string;
     name: string;
-    places: {
-      id: string;
-      name: string;
-      order: number;
-    }[];
+    places: Place[];
   };
 }
 
@@ -309,11 +302,7 @@ interface PlaceListProps {
   tripId: string;
   dayId: string;
   cityId: string;
-  places: {
-    id: string;
-    name: string;
-    order: number;
-  }[];
+  places: Place[];
 }
 
 const PlaceList: React.FC<PlaceListProps> = ({ tripId, dayId, cityId, places }) => {
