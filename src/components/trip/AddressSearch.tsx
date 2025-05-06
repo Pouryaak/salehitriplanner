@@ -7,6 +7,7 @@ import { Search, Loader2, MapPin } from "lucide-react";
 
 export interface LocationResult {
   name: string;
+  fullAddress?: string; // Added to store the full address
   lat?: number;
   lng?: number;
 }
@@ -88,14 +89,15 @@ const AddressSearch: React.FC<AddressSearchProps> = ({ onAddressSelect, placehol
   }, [query]);
 
   const handleSelectAddress = (address: AddressSuggestion) => {
-    setQuery(address.display_name);
     onAddressSelect({
       name: address.display_name,
+      fullAddress: address.display_name, // Store full address
       lat: parseFloat(address.lat),
       lng: parseFloat(address.lon)
     });
     setIsOpen(false);
     setSuggestions([]);
+    setQuery(''); // Clear the input after selection
   };
 
   return (

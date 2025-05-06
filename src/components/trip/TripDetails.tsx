@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -169,7 +170,8 @@ const DayCard: React.FC<DayCardProps> = ({ tripId, day }) => {
     // Create a modified location with just the city name
     const cityLocation: LocationResult = {
       ...locationInfo,
-      name: cityName
+      name: cityName,
+      fullAddress: locationInfo.name
     };
     
     addCity(tripId, day.id, cityLocation);
@@ -277,7 +279,8 @@ const CityCard: React.FC<CityCardProps> = ({ tripId, dayId, city }) => {
     // Create a modified location with just the place name
     const placeLocation: LocationResult = {
       ...locationInfo,
-      name: placeName
+      name: placeName,
+      fullAddress: locationInfo.name
     };
     
     addPlace(tripId, dayId, city.id, placeLocation);
@@ -368,10 +371,14 @@ const PlaceList: React.FC<PlaceListProps> = ({ tripId, dayId, cityId, places }) 
     toast.success("Place removed from your itinerary");
   };
 
-  const openInGoogleMaps = (placeName: string) => {
-    const encodedQuery = encodeURIComponent(placeName);
+  const openInGoogleMaps = (place: Place) => {
+    // Use fullAddress if available, otherwise fallback to name
+    const searchQuery = place.fullAddress || place.name;
+    const encodedQuery = encodeURIComponent(searchQuery);
     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`;
-    window.open(googleMapsUrl, '_blank');
+    
+    // Replace window.open with location change to avoid opening a new tab
+    window.location.href = googleMapsUrl;
   };
 
   const sortedPlaces = [...places].sort((a, b) => a.order - b.order);
@@ -395,7 +402,7 @@ const PlaceList: React.FC<PlaceListProps> = ({ tripId, dayId, cityId, places }) 
             <div className="flex-1 bg-background p-3 rounded-lg shadow-sm flex justify-between items-center">
               <button 
                 className="flex items-center text-left hover:text-travel-primary transition-colors"
-                onClick={() => openInGoogleMaps(place.name)}
+                onClick={() => openInGoogleMaps(place)}
               >
                 <span>{place.name}</span>
                 <ExternalLink className="h-3 w-3 ml-2" />

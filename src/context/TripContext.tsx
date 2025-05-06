@@ -99,6 +99,7 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
       id: uuidv4(),
       name: locationInfo.name,
       places: [],
+      fullAddress: locationInfo.fullAddress || locationInfo.name, // Store full address
     };
 
     setTrips(currentTrips => {
@@ -157,6 +158,7 @@ export const TripProvider = ({ children }: { children: React.ReactNode }) => {
       order: maxOrder + 1,
       lat: locationInfo.lat,
       lng: locationInfo.lng,
+      fullAddress: locationInfo.fullAddress || locationInfo.name, // Store full address
     };
 
     setTrips(currentTrips => {

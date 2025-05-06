@@ -6,12 +6,14 @@ export interface Place {
   order: number;
   lat?: number;
   lng?: number;
+  fullAddress?: string; // Added to store the full address
 }
 
 export interface City {
   id: string;
   name: string;
   places: Place[];
+  fullAddress?: string; // Added to store the full address
 }
 
 export interface Day {
